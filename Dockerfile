@@ -1,26 +1,27 @@
-# Multi-stage build for Spring Boot application
+FROM maven:3.9-eclipse-temurin-21 AS builder
 
-# Stage 1: Build
-FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy pom.xml and download dependencies
+# Copy pom.xml and download dependencies (cache layer)
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build
+# Copy source code
 COPY src ./src
+
+# Build the application
 RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime
+# Runtime stage
 FROM eclipse-temurin:21-jre-alpine
+
 WORKDIR /app
 
-# Copy jar from build stage
-COPY --from=build /app/target/*.jar app.jar
+# Copy the built JAR from builder stage
+COPY --from=builder /app/target/*.jar app.jar
 
-# Expose port
-EXPOSE 8080
+# Expose application port and debug port
+EXPOSE 8080 5005
 
-# Run application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Default command (can be overridden in docker-compose)
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "app.jar"]
