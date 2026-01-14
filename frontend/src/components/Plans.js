@@ -84,21 +84,21 @@ function Plans() {
       <div className="row">
         {plans.map((plan) => (
           <div key={plan.id} className="col-md-4 mb-4">
-            <div className="card">
-              <div className="card-body">
+            <div className="card h-100">
+              <div className="card-body d-flex flex-column">
                 <h5 className="card-title">{plan.name}</h5>
                 <p className="card-text">${plan.priceCents / 100}</p>
-                <ul>
+                <ul className="flex-grow-1">
                   {plan.limits && Object.entries(plan.limits).map(([key, value]) => (
                     <li key={key}><strong>{key}:</strong> {value}</li>
                   ))}
                 </ul>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary mt-auto"
                   onClick={() => handlePay(plan.code)}
                   disabled={subscription?.planCode === plan.code}
                 >
-                  {subscription?.planCode === plan.code ? 'Current Plan' : 'Achita'}
+                  {subscription?.planCode === plan.code ? 'Plan Curent' : 'Selecteaza acest plan'}
                 </button>
               </div>
             </div>
