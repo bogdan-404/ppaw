@@ -18,11 +18,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.thedeanda.lorem.Lorem;
+import com.thedeanda.lorem.LoremIpsum;
+
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -35,6 +39,9 @@ public class TextService {
     private final SavedWorkRepository savedWorkRepository;
     private final PlanService planService;
     private final AuthService authService;
+    
+    private final Lorem lorem = LoremIpsum.getInstance();
+    private final Random random = new Random();
     
     private User getUserById(UUID userId) {
         return authService.getUserById(userId);
@@ -199,15 +206,22 @@ public class TextService {
     }
 
     private String generateSummary(String text, String style) {
-        // Simple simulation: return first words + style label
-        String[] words = text.split("\\s+");
-        int summaryLength = Math.min(50, words.length);
-        String summary = String.join(" ", Arrays.copyOfRange(words, 0, summaryLength));
-        return "[SUMMARY - " + (style != null ? style : "simple") + "]: " + summary + "...";
+        // Generate random lorem ipsum summary
+        // Use 20-50% of input word count, with minimum 10 and maximum 100 words
+        int inputWordCount = text.split("\\s+").length;
+        int minWords = Math.max(10, inputWordCount / 5); // 20% of input, min 10
+        int maxWords = Math.min(100, inputWordCount / 2); // 50% of input, max 100
+        int wordCount = minWords + random.nextInt(Math.max(1, maxWords - minWords + 1));
+        return lorem.getWords(wordCount);
     }
 
     private String generateRewrite(String text, String style) {
-        // Simple simulation: return text with style prefix
-        return "[REWRITTEN - " + (style != null ? style : "simple") + "]: " + text;
+        // Generate random lorem ipsum rewrite
+        // Use 80-120% of input word count, with minimum 20 words
+        int inputWordCount = text.split("\\s+").length;
+        int minWords = Math.max(20, (int) (inputWordCount * 0.8)); // 80% of input, min 20
+        int maxWords = (int) (inputWordCount * 1.2); // 120% of input
+        int wordCount = minWords + random.nextInt(Math.max(1, maxWords - minWords + 1));
+        return lorem.getWords(wordCount);
     }
 }

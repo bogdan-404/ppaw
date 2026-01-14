@@ -82,6 +82,13 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         
+        <!-- Lorem Ipsum Generator -->
+        <dependency>
+            <groupId>com.thedeanda</groupId>
+            <artifactId>lorem</artifactId>
+            <version>2.2</version>
+        </dependency>
+        
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
