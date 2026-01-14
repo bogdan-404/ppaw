@@ -62,11 +62,11 @@ CREATE TABLE saved_works (
     output_text TEXT NOT NULL,
     style VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP NULL
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_saved_works_user_created ON saved_works(user_id, created_at);
-CREATE INDEX idx_saved_works_deleted_at ON saved_works(deleted_at);
+CREATE INDEX idx_saved_works_is_deleted ON saved_works(is_deleted);
 
 -- Tone rule sets table
 CREATE TABLE tone_rule_sets (

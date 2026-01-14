@@ -95,8 +95,15 @@ public class AdminController {
 
     @PostMapping("/plans/delete/{id}")
     public String deletePlan(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
-        planService.deletePlan(id);
+        planService.softDeletePlan(id);
         redirectAttributes.addFlashAttribute("message", "Plan deleted successfully");
+        return "redirect:/admin/plans";
+    }
+
+    @PostMapping("/plans/hard-delete/{id}")
+    public String hardDeletePlan(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+        planService.hardDeletePlan(id);
+        redirectAttributes.addFlashAttribute("message", "Plan permanently deleted");
         return "redirect:/admin/plans";
     }
 
@@ -184,6 +191,20 @@ public class AdminController {
                                 RedirectAttributes redirectAttributes) {
         userService.updateUserPassword(id, password);
         redirectAttributes.addFlashAttribute("message", "Password updated successfully");
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+        userService.softDeleteUser(id);
+        redirectAttributes.addFlashAttribute("message", "User deleted successfully");
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/users/hard-delete/{id}")
+    public String hardDeleteUser(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
+        userService.hardDeleteUser(id);
+        redirectAttributes.addFlashAttribute("message", "User permanently deleted");
         return "redirect:/admin/users";
     }
 

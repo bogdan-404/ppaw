@@ -82,10 +82,21 @@ public class PlanService {
 
     @CacheEvict(value = "plans", allEntries = true)
     @Transactional
-    public void deletePlan(UUID id) {
-        log.info("Deleting plan: {}", id);
+    public void softDeletePlan(UUID id) {
+        log.info("Soft deleting plan: {}", id);
+        Plan plan = planRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+        plan.setIsActive(false);
+        plan = planRepository.save(plan);
+        log.info("Plan soft deleted (deactivated) successfully: {}", id);
+    }
+
+    @CacheEvict(value = "plans", allEntries = true)
+    @Transactional
+    public void hardDeletePlan(UUID id) {
+        log.info("Hard deleting plan: {}", id);
         planRepository.deleteById(id);
-        log.info("Plan deleted successfully: {}", id);
+        log.info("Plan hard deleted successfully: {}", id);
     }
 
     private PlanDto toDto(Plan plan) {

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "saved_works", indexes = {
     @Index(name = "idx_saved_works_user_created", columnList = "user_id, created_at"),
-    @Index(name = "idx_saved_works_deleted_at", columnList = "deleted_at")
+    @Index(name = "idx_saved_works_is_deleted", columnList = "is_deleted")
 })
 @Data
 @NoArgsConstructor
@@ -46,8 +46,9 @@ public class SavedWork {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
 
     public enum WorkType {
         SUMMARIZE, REWRITE, BATCH

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface SavedWorkRepository extends JpaRepository<SavedWork, UUID> {
-    List<SavedWork> findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID userId);
+    List<SavedWork> findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(UUID userId);
     
-    Optional<SavedWork> findByIdAndDeletedAtIsNull(UUID id);
+    Optional<SavedWork> findByIdAndIsDeletedFalse(UUID id);
 }

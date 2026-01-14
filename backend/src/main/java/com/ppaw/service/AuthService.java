@@ -44,6 +44,12 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
 
+        // Check if user is soft-deleted
+        if (Boolean.TRUE.equals(user.getIsDeleted())) {
+            log.warn("Login attempt for soft-deleted user: {}", request.getEmail());
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+
         if (!user.getPasswordHash().equals(request.getPassword())) {
             log.warn("Failed login attempt for email: {}", request.getEmail());
             throw new IllegalArgumentException("Invalid credentials");
@@ -54,7 +60,7 @@ public class AuthService {
     }
 
     public User getUserById(UUID userId) {
-        return userRepository.findById(userId)
+        return userRepository.findByIdAndIsDeletedFalse(userId)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 }

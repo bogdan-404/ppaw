@@ -39,6 +39,10 @@ public class User {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Subscription> subscriptions = new ArrayList<>();

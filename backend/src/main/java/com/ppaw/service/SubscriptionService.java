@@ -9,6 +9,8 @@ import com.ppaw.dataaccess.repository.SubscriptionRepository;
 import com.ppaw.service.dto.SubscriptionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +29,15 @@ public class SubscriptionService {
     private final PlanService planService;
     private final AuthService authService;
 
+    @Cacheable(value = "subscriptions", key = "#userId")
+    @Transactional(readOnly = true)
     public SubscriptionDto getCurrentSubscription(UUID userId) {
         Subscription subscription = subscriptionRepository.findFirstByUserIdAndStatusOrderByStartAtDesc(userId, SubscriptionStatus.ACTIVE)
             .orElseGet(() -> getOrCreateFreeSubscription(userId));
         return toDto(subscription);
     }
 
+    @CacheEvict(value = "subscriptions", key = "#userId")
     @Transactional
     public SubscriptionDto payForPlan(UUID userId, String planCode) {
         log.info("Processing payment for user: {}, plan: {}", userId, planCode);
@@ -61,6 +66,7 @@ public class SubscriptionService {
         return toDto(subscription);
     }
 
+    @CacheEvict(value = "subscriptions", key = "#userId")
     @Transactional
     public void cancelSubscription(UUID userId) {
         log.info("Canceling subscription for user: {}", userId);
