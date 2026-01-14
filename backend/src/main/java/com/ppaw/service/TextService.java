@@ -147,7 +147,7 @@ public class TextService {
     }
 
     private Subscription getActiveSubscription(UUID userId) {
-        return subscriptionRepository.findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE)
+        return subscriptionRepository.findFirstByUserIdAndStatusOrderByStartAtDesc(userId, SubscriptionStatus.ACTIVE)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No active subscription"));
     }
 
