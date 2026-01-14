@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
 
@@ -9,28 +9,49 @@ function Plans() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadPlans();
-    loadSubscription();
-  }, []);
-
-  const loadPlans = async () => {
+  const loadPlans = useCallback(async () => {
     try {
-      const response = await apiClient.get('/api/plans');
+      const response = await apiClient.get(`/api/plans?t=${Date.now()}`);
       setPlans(response.data);
     } catch (err) {
       setError(err.message);
     }
-  };
+  }, []);
 
-  const loadSubscription = async () => {
+  const loadSubscription = useCallback(async () => {
     try {
       const response = await apiClient.get('/api/subscription');
       setSubscription(response.data);
     } catch (err) {
       // Ignore if no subscription
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Load initial data
+    loadPlans();
+    loadSubscription();
+
+    // Set up polling to refresh plans every 5 seconds
+    const interval = setInterval(() => {
+      loadPlans();
+      loadSubscription();
+    }, 5000);
+
+    // Refresh when window gains focus (user switches back to tab)
+    const handleFocus = () => {
+      loadPlans();
+      loadSubscription();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    // Cleanup
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [loadPlans, loadSubscription]);
+
 
   const handlePay = async (planCode) => {
     try {

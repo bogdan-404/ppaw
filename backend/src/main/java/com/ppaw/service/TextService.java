@@ -21,6 +21,9 @@ import org.springframework.web.server.ResponseStatusException;
 import com.thedeanda.lorem.Lorem;
 import com.thedeanda.lorem.LoremIpsum;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -39,6 +42,7 @@ public class TextService {
     private final SavedWorkRepository savedWorkRepository;
     private final PlanService planService;
     private final AuthService authService;
+    private final CacheManager cacheManager;
     
     private final Lorem lorem = LoremIpsum.getInstance();
     private final Random random = new Random();
@@ -95,6 +99,13 @@ public class TextService {
             .createdAt(LocalDateTime.now())
             .build();
         savedWork = savedWorkRepository.save(savedWork);
+        
+        // Evict cache for this user's history
+        if (cacheManager.getCache("history") != null) {
+            cacheManager.getCache("history").evictIfPresent(userId);
+            log.info("Cache evicted for user history: {}", userId);
+        }
+        
         log.info("Work saved to history: {}", savedWork.getId());
 
         return new TextResponse(output, savedWork.getId());
@@ -148,6 +159,13 @@ public class TextService {
             .createdAt(LocalDateTime.now())
             .build();
         savedWork = savedWorkRepository.save(savedWork);
+        
+        // Evict cache for this user's history
+        if (cacheManager.getCache("history") != null) {
+            cacheManager.getCache("history").evictIfPresent(userId);
+            log.info("Cache evicted for user history: {}", userId);
+        }
+        
         log.info("Work saved to history: {}", savedWork.getId());
 
         return new TextResponse(output, savedWork.getId());

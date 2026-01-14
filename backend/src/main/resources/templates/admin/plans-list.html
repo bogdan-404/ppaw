@@ -35,8 +35,11 @@
                     <td>
                         <a th:href="@{/admin/plans/edit/{id}(id=${plan.id})}" class="btn btn-sm btn-primary">Edit</a>
                         <a th:href="@{/admin/plans/{id}/limits(id=${plan.id})}" class="btn btn-sm btn-info">Limits</a>
-                        <form th:action="@{/admin/plans/delete/{id}(id=${plan.id})}" method="post" style="display:inline">
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        <form th:action="@{/admin/plans/delete/{id}(id=${plan.id})}" method="post" style="display:inline" onsubmit="return confirm('Are you sure you want to soft delete (deactivate) this plan?');">
+                            <button type="submit" class="btn btn-sm btn-warning">Soft delete (deactivate)</button>
+                        </form>
+                        <form th:action="@{/admin/plans/hard-delete/{id}(id=${plan.id})}" method="post" style="display:inline" onsubmit="return confirm('Are you sure you want to PERMANENTLY delete this plan? This action cannot be undone!');">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete Permanently</button>
                         </form>
                     </td>
                 </tr>

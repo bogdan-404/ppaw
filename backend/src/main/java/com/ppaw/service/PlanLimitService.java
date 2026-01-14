@@ -6,7 +6,6 @@ import com.ppaw.dataaccess.repository.PlanLimitRepository;
 import com.ppaw.dataaccess.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ public class PlanLimitService {
     private final PlanLimitRepository planLimitRepository;
     private final PlanRepository planRepository;
 
-    @CacheEvict(value = "plans", allEntries = true)
     @Transactional
     public PlanLimit createPlanLimit(UUID planId, String key, String value) {
         log.info("Creating plan limit: planId={}, key={}, value={}", planId, key, value);
@@ -39,7 +37,6 @@ public class PlanLimitService {
         return limit;
     }
 
-    @CacheEvict(value = "plans", allEntries = true)
     @Transactional
     public PlanLimit updatePlanLimit(UUID limitId, String value) {
         log.info("Updating plan limit: {}", limitId);
@@ -51,7 +48,6 @@ public class PlanLimitService {
         return limit;
     }
 
-    @CacheEvict(value = "plans", allEntries = true)
     @Transactional
     public void deletePlanLimit(UUID limitId) {
         log.info("Deleting plan limit: {}", limitId);

@@ -5,6 +5,8 @@ import com.ppaw.dataaccess.repository.SavedWorkRepository;
 import com.ppaw.service.dto.SavedWorkDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +21,18 @@ public class HistoryService {
 
     private final SavedWorkRepository savedWorkRepository;
 
+    @Cacheable(value = "history", key = "#userId")
+    @Transactional(readOnly = true)
     public List<SavedWorkDto> getHistory(UUID userId) {
+        log.info("Fetching history for user: {}", userId);
         List<SavedWork> works = savedWorkRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(userId);
+        log.info("Found {} history items for user: {}", works.size(), userId);
         return works.stream()
             .map(this::toDto)
             .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "history", key = "#userId")
     @Transactional
     public void softDeleteWork(UUID userId, UUID workId) {
         log.info("Soft deleting saved work: userId={}, workId={}", userId, workId);
@@ -41,6 +48,7 @@ public class HistoryService {
         log.info("Work soft deleted: {}", workId);
     }
 
+    @CacheEvict(value = "history", key = "#userId")
     @Transactional
     public void hardDeleteWork(UUID userId, UUID workId) {
         log.info("Hard deleting saved work: userId={}, workId={}", userId, workId);

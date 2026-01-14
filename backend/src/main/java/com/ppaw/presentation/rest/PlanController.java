@@ -3,10 +3,12 @@ package com.ppaw.presentation.rest;
 import com.ppaw.service.PlanService;
 import com.ppaw.service.dto.PlanDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/plans")
@@ -18,6 +20,8 @@ public class PlanController {
 
     @GetMapping
     public ResponseEntity<List<PlanDto>> getAllPlans() {
-        return ResponseEntity.ok(planService.getAllActivePlans());
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noCache().mustRevalidate())
+            .body(planService.getAllActivePlans());
     }
 }

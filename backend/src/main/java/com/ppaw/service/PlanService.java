@@ -6,8 +6,6 @@ import com.ppaw.dataaccess.repository.PlanRepository;
 import com.ppaw.service.dto.PlanDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,17 +22,16 @@ public class PlanService {
 
     private final PlanRepository planRepository;
 
-    @Cacheable(value = "plans", key = "'all'")
     @Transactional(readOnly = true)
     public List<PlanDto> getAllActivePlans() {
-        log.info("Fetching all active plans");
+        log.info("Fetching all active plans from database");
         List<Plan> plans = planRepository.findByIsActiveTrue();
+        log.info("Found {} active plans", plans.size());
         return plans.stream()
             .map(this::toDto)
             .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "plans", key = "#code")
     @Transactional(readOnly = true)
     public PlanDto getPlanByCode(String code) {
         log.info("Fetching plan by code: {}", code);
@@ -48,7 +45,6 @@ public class PlanService {
             .orElseThrow(() -> new IllegalArgumentException("Plan not found: " + code));
     }
 
-    @CacheEvict(value = "plans", allEntries = true)
     @Transactional
     public PlanDto createPlan(PlanDto dto) {
         log.info("Creating new plan: {}", dto.getCode());
@@ -64,10 +60,9 @@ public class PlanService {
         return toDto(plan);
     }
 
-    @CacheEvict(value = "plans", allEntries = true)
     @Transactional
     public PlanDto updatePlan(UUID id, PlanDto dto) {
-        log.info("Updating plan: {}", id);
+        log.info("Updating plan: {}, isActive: {}", id, dto.getIsActive());
         Plan plan = planRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
         plan.setCode(dto.getCode());
@@ -76,22 +71,18 @@ public class PlanService {
         plan.setBillingPeriod(dto.getBillingPeriod());
         plan.setIsActive(dto.getIsActive());
         plan = planRepository.save(plan);
-        log.info("Plan updated successfully: {}", plan.getId());
+        log.info("Plan updated successfully: {}, isActive: {}", plan.getId(), plan.getIsActive());
         return toDto(plan);
     }
 
-    @CacheEvict(value = "plans", allEntries = true)
     @Transactional
     public void softDeletePlan(UUID id) {
         log.info("Soft deleting plan: {}", id);
-        Plan plan = planRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
-        plan.setIsActive(false);
-        plan = planRepository.save(plan);
+        planRepository.deactivatePlan(id);
+        planRepository.flush();
         log.info("Plan soft deleted (deactivated) successfully: {}", id);
     }
 
-    @CacheEvict(value = "plans", allEntries = true)
     @Transactional
     public void hardDeletePlan(UUID id) {
         log.info("Hard deleting plan: {}", id);
